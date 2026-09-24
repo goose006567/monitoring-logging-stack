@@ -1,0 +1,36 @@
+groups:
+  - name: infra-alerts
+    rules:
+      - alert: HighCpuUsage
+        expr: node_cpu_usage_percent > 90
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CPU above 90% on {{ $labels.instance }}"
+
+      - alert: LowMemory
+        expr: node_memory_MemAvailable_bytes < 500000000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Less than 500MB memory available"
+
+      - alert: DiskSpaceLow
+        expr: (1 - node_filesystem_avail_bytes / node_filesystem_size_bytes) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk more than 85% full"
+
+  - name: app-alerts
+    rules:
+      - alert: HighErrorRate
+        expr: rate(app_http_errors_total[5m]) / rate(app_http_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Error rate above 5%"

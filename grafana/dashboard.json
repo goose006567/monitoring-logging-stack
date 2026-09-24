@@ -1,0 +1,76 @@
+{
+  "title": "Infrastructure Health",
+  "uid": "infra-health",
+  "timezone": "browser",
+  "schemaVersion": 27,
+  "version": 1,
+  "refresh": "15s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "CPU Usage %",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "avg by (instance) (node_cpu_usage_percent)", "legendFormat": "{{instance}}" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "thresholds": { "mode": "absolute", "steps": [{"color":"green","value":null},{"color":"yellow","value":75},{"color":"red","value":90}] } } }
+    },
+    {
+      "id": 2,
+      "title": "Memory Used",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / 1024 / 1024", "legendFormat": "used MiB" }],
+      "fieldConfig": { "defaults": { "unit": "decmbytes" } }
+    },
+    {
+      "id": 3,
+      "title": "Disk Used %",
+      "type": "gauge",
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "(1 - node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100", "legendFormat": "{{mountpoint}}" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "max": 100, "thresholds": { "mode": "absolute", "steps": [{"color":"green","value":null},{"color":"yellow","value":85},{"color":"red","value":95}] } } }
+    },
+    {
+      "id": 4,
+      "title": "Network Throughput",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "rate(node_network_receive_bytes_total[1m])", "legendFormat": "rx" },
+        { "expr": "rate(node_network_transmit_bytes_total[1m])", "legendFormat": "tx" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "Bps" } }
+    },
+    {
+      "id": 5,
+      "title": "HTTP Request Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "rate(app_http_requests_total[1m])", "legendFormat": "req/s" }]
+    },
+    {
+      "id": 6,
+      "title": "Error Rate %",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "100 * rate(app_http_errors_total[5m]) / clamp_min(rate(app_http_requests_total[5m]), 0.0001)", "legendFormat": "errors" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "thresholds": { "mode": "absolute", "steps": [{"color":"green","value":null},{"color":"yellow","value":3},{"color":"red","value":5}] } } }
+    },
+    {
+      "id": 7,
+      "title": "Request Latency",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "app_request_latency_seconds", "legendFormat": "p95" }],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    }
+  ]
+}

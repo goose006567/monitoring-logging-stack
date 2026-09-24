@@ -1,0 +1,43 @@
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    ports: ["9090:9090"]
+    volumes:
+      - ./prometheus:/etc/prometheus
+    command: ["--config.file=/etc/prometheus/prometheus.yml"]
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    ports: ["9100:9100"]
+
+  app-exporter:
+    build: ./exporters
+    ports: ["9101:9101"]
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    ports: ["9093:9093"]
+    volumes:
+      - ./alertmanager:/etc/alertmanager
+
+  grafana:
+    image: grafana/grafana:latest
+    ports: ["3000:3000"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./grafana:/var/lib/grafana/dashboards
+
+  loki:
+    image: grafana/loki:latest
+    ports: ["3100:3100"]
+    volumes:
+      - ./loki:/etc/loki
+    command: ["-config.file=/etc/loki/loki-config.yml"]
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - ./loki:/etc/promtail
+      - /var/log/app:/var/log/app
+    command: ["-config.file=/etc/promtail/promtail-config.yml"]
